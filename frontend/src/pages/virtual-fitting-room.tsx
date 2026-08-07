@@ -70,11 +70,10 @@ export function VirtualFittingRoomPage() {
 
   // Sync colour when selected product changes/loads
   useEffect(() => {
-    if (selectedProduct) {
-      setSelectedColour(resolveColour(selectedProduct, urlColour));
-      setInvalidProduct(false);
-    }
-  }, [selectedProduct, urlColour]);
+  if (selectedProduct) {
+    setInvalidProduct(false);
+  }
+}, [selectedProduct]);
 
   // Mark invalid if a productId was supplied but resolves to nothing eligible
   useEffect(() => {
@@ -87,15 +86,25 @@ export function VirtualFittingRoomPage() {
 
   // Keep colour consistent if URL colour param is invalid for the product
   useEffect(() => {
-    if (selectedProduct && selectedColour && !selectedProduct.colours.includes(selectedColour)) {
-      const fallback = resolveColour(selectedProduct, selectedColour);
-      setSelectedColour(fallback);
-      setSearchParams(
-        { productId: selectedProduct.id, colour: encodeURIComponent(fallback) },
-        { replace: true }
-      );
-    }
-  }, [selectedProduct, selectedColour, setSearchParams]);
+  if (!selectedProduct || selectedProduct.id !== urlProductId) return;
+
+  const resolvedColour = resolveColour(selectedProduct, urlColour);
+
+  if (urlColour !== resolvedColour) {
+    setSearchParams(
+      {
+        productId: selectedProduct.id,
+        colour: resolvedColour,
+      },
+      { replace: true }
+    );
+  }
+}, [
+  selectedProduct,
+  urlProductId,
+  urlColour,
+  setSearchParams,
+]);
 
   // Cleanup object URL on unmount or replacement
   useEffect(() => {
@@ -105,30 +114,42 @@ export function VirtualFittingRoomPage() {
   }, [imageUrl]);
 
   const selectProduct = (product: Product, colour?: string) => {
-    const resolvedColour = colour && product.colours.includes(colour) ? colour : product.colours[0];
-    setResult(null);
-    setFeedback(null);
-    setSearchParams(
-      { productId: product.id, colour: encodeURIComponent(resolvedColour) },
-      { replace: true }
-    );
-    setSelectedColour(resolvedColour);
-  };
+  const resolvedColour =
+    colour && product.colours.includes(colour)
+      ? colour
+      : product.colours[0];
+
+  setResult(null);
+  setFeedback(null);
+
+  setSearchParams(
+    {
+      productId: product.id,
+      colour: resolvedColour,
+    },
+    { replace: true }
+  );
+};
 
   const handleSelectFromPicker = (product: Product) => {
     selectProduct(product);
   };
 
   const handleColourChange = (colour: string) => {
-    if (!selectedProduct) return;
-    setSelectedColour(colour);
-    setResult(null);
-    setFeedback(null);
-    setSearchParams(
-      { productId: selectedProduct.id, colour: encodeURIComponent(colour) },
-      { replace: true }
-    );
-  };
+  if (!selectedProduct) return;
+  if (!selectedProduct.colours.includes(colour)) return;
+
+  setResult(null);
+  setFeedback(null);
+
+  setSearchParams(
+    {
+      productId: selectedProduct.id,
+      colour,
+    },
+    { replace: true }
+  );
+};
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
