@@ -1,11 +1,17 @@
 import { USE_MOCK_API, apiClient } from './apiClient';
-import { getTryOnEligibleProducts } from '../mocks/products';
 import { mockRequest } from '../mocks/mockDatabase';
-import { getProductById } from '../mocks/productRepository';
+import { getProductById, getProducts } from '../mocks/productRepository';
 import type { Product, VirtualTryOnRequest, VirtualTryOnResult } from '../types';
 
 export async function getEligibleProducts(): Promise<Product[]> {
-  if (USE_MOCK_API) return mockRequest(getTryOnEligibleProducts());
+  if (USE_MOCK_API) {
+    const products = getProducts().filter(
+      (product) => product.isPublished && product.tryOnEligible
+    );
+
+    return mockRequest(products);
+  }
+
   const response = await apiClient.get('/virtual-try-on/eligible');
   return response.data;
 }
