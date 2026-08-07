@@ -138,7 +138,7 @@ export function ProductPage() {
           </div>
 
           {product.tryOnEligible && (
-            <Button asChild variant="outline" size="lg" className="w-full mt-3"><Link to="/virtual-fitting-room"><Scan className="h-5 w-5" /> Try On Virtually</Link></Button>
+            <Button asChild variant="outline" size="lg" className="w-full mt-3"><Link to={`/virtual-fitting-room?productId=${product.id}&colour=${encodeURIComponent(colour)}`}><Scan className="h-5 w-5" /> Try On Virtually</Link></Button>
           )}
 
           {/* Trust badges */}
