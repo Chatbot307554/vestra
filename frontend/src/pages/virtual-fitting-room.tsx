@@ -46,7 +46,10 @@ export function VirtualFittingRoomPage() {
 
   // Selected product + colour (URL is the source of truth for product)
   const selectedProduct = urlProduct ?? null;
-  const [selectedColour, setSelectedColour] = useState<string>('');
+
+  const selectedColour = selectedProduct
+  ? resolveColour(selectedProduct, urlColour)
+  : '';
   const [pickerOpen, setPickerOpen] = useState(false);
   const [invalidProduct, setInvalidProduct] = useState(false);
 
